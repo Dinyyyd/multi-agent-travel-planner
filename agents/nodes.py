@@ -105,7 +105,7 @@ def router(state: GraphState) -> dict:
     try:
         extracted = travel_extractor.invoke(invocation_messages)
 
-        data = extracted.dict()
+        data = extracted.model_dump()
 
     except Exception:
         data = {
@@ -163,7 +163,7 @@ def _format_hotel(hotel: dict) -> str:
     else:
         city = city_data
 
-    stars = hotel.get("stars", hotel.get("rating", "N/A"))
+    stars = hotel.get("starRating", hotel.get("stars", hotel.get("rating", "N/A")))
     price = hotel.get("price", hotel.get("pricePerNight", "N/A"))
     currency = hotel.get("currency", "USD")
 
