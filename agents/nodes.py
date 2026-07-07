@@ -278,6 +278,12 @@ def hotel_node(state: GraphState) -> dict:
                 "room_type": room_type,
             }
         )
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     elif city:
         params = {
@@ -291,9 +297,21 @@ def hotel_node(state: GraphState) -> dict:
             params["checkOut"] = check_out
 
         result = call_mcp_tool("search_hotel", params)
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     else:
         result = call_mcp_tool("get_hotels", {})
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     if state.get("sub_action") == "book":
         if isinstance(result, dict):
@@ -371,6 +389,12 @@ def flight_node(state: GraphState) -> dict:
                 "passenger_email": passenger_email,
             }
         )
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     elif origin and destination:
         params = {
@@ -382,6 +406,12 @@ def flight_node(state: GraphState) -> dict:
             params["date"] = flight_date
 
         result = call_mcp_tool("search_flights", params)
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     elif origin or destination:
         return {
@@ -395,6 +425,12 @@ def flight_node(state: GraphState) -> dict:
 
     else:
         result = call_mcp_tool("get_flights", {})
+        if isinstance(result, dict) and result.get("error"):
+            return {
+                "hotel_results": [],
+                "flight_results": [],
+                "response_text": result["message"],
+            }
 
     if state.get("sub_action") == "book":
         if isinstance(result, dict):
