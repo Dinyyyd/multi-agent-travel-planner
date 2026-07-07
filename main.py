@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from entity import ChatRequest, ChatResponse
-from agents.tools import get_hotels, get_flights
+from agents.mcp_client import call_mcp_tool
 from agents.graph import graph
 
 conversation_history_messages = []
@@ -24,12 +24,12 @@ async def hello():
 
 @app.get("/hotels")
 async def list_hotels():
-    return get_hotels.invoke({})
+    return call_mcp_tool("get_hotels", {})
 
 
 @app.get("/flights")
 async def list_flights():
-    return get_flights.invoke({})
+    return call_mcp_tool("get_flights", {})
 
 
 @app.post("/chat", response_model=ChatResponse)
