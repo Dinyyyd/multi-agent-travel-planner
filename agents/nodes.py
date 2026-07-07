@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 # pyrefly: ignore [missing-import]
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-from .tools import get_flights, search_flights, book_flight
 from .mcp_client import call_mcp_tool
 from .llm import llm
 from .prompts import get_system_prompt_for_unknown_node, get_system_prompt_with_history
@@ -367,7 +366,7 @@ def flight_node(state: GraphState) -> dict:
                 ),
             }
 
-        result = book_flight.invoke(
+        result = call_mcp_tool("book_flight",
             {
                 "flight_id": flight_id,
                 "passenger_name": passenger_name,
@@ -384,7 +383,7 @@ def flight_node(state: GraphState) -> dict:
         if flight_date:
             params["date"] = flight_date
 
-        result = search_flights.invoke(params)
+        result = call_mcp_tool("search_flights",params)
 
     elif origin or destination:
         return {
@@ -397,7 +396,7 @@ def flight_node(state: GraphState) -> dict:
         }
 
     else:
-        result = get_flights.invoke({})
+        result = call_mcp_tool("get_flights",{})
 
     if state.get("sub_action") == "book":
         if isinstance(result, dict):
