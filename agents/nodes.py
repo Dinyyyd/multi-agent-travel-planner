@@ -477,24 +477,14 @@ def generate_response(state: GraphState) -> dict:
 
     if hotel_results:
         count = len(hotel_results)
-        lines = [_format_hotel(hotel) for hotel in hotel_results[:5]]
-
         return {
-            "response_text": (
-                f"I found {count} hotel option{'s' if count != 1 else ''}:\n"
-                + "\n".join(lines)
-            )
+            "response_text": f"I found {count} hotel option{'s' if count != 1 else ''} for you:"
         }
 
     if flight_results:
         count = len(flight_results)
-        lines = [_format_flight(flight) for flight in flight_results[:5]]
-
         return {
-            "response_text": (
-                f"I found {count} flight option{'s' if count != 1 else ''}:\n"
-                + "\n".join(lines)
-            )
+            "response_text": f"I found {count} flight option{'s' if count != 1 else ''} for you:"
         }
 
     return {
