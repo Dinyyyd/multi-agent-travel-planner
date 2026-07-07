@@ -8,3 +8,6 @@ langchain
 langchain-openai
 langchain-core
 langgraph
+requests
+mcp
+langchain-mcp-adapters

@@ -1,9 +1,11 @@
 from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
+# pyrefly: ignore [missing-import]
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-from .tools import get_hotels, search_hotel, book_hotel, get_flights, search_flights, book_flight
+from .tools import get_flights, search_flights, book_flight
+from .mcp_client import call_mcp_tool
 from .llm import llm
 from .prompts import get_system_prompt_for_unknown_node, get_system_prompt_with_history
 from .entity import GraphState
@@ -163,7 +165,7 @@ def _format_hotel(hotel: dict) -> str:
     else:
         city = city_data
 
-    stars = hotel.get("stars", hotel.get("rating", "N/A"))
+    stars = hotel.get("starRating", hotel.get("stars", hotel.get("rating","N/A")))
     price = hotel.get("price", hotel.get("pricePerNight", "N/A"))
     currency = hotel.get("currency", "USD")
 
@@ -268,7 +270,8 @@ def hotel_node(state: GraphState) -> dict:
                 ),
             }
 
-        result = book_hotel.invoke(
+        result = call_mcp_tool(
+            "book_hotel",
             {
                 "hotel_id": hotel_id,
                 "guest_name": guest_name,
@@ -290,10 +293,10 @@ def hotel_node(state: GraphState) -> dict:
         if check_out:
             params["checkOut"] = check_out
 
-        result = search_hotel.invoke(params)
+        result = call_mcp_tool("search_hotel",params)
 
     else:
-        result = get_hotels.invoke({})
+        result = call_mcp_tool("get_hotels",{})
 
     if state.get("sub_action") == "book":
         if isinstance(result, dict):
