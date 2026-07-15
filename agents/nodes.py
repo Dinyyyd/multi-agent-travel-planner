@@ -126,16 +126,24 @@ def router(state: GraphState) -> dict:
             "passenger_email": None,
         }
 
+    extracted_city = data.get("city")
+    extracted_origin = data.get("origin")
+    extracted_destination = data.get("destination")
+
+    final_city = extracted_city or state.get("last_city")
+    final_origin = extracted_origin or state.get("last_origin")
+    final_destination = extracted_destination or state.get("last_destination")
+
     return {
         "intent": data.get("intent", "unknown"),
         "sub_action": data.get("sub_action", "general"),
 
-        "city": data.get("city"),
+        "city": final_city,
         "check_in": data.get("check_in"),
         "check_out": data.get("check_out"),
 
-        "origin": data.get("origin"),
-        "destination": data.get("destination"),
+        "origin": final_origin,
+        "destination": final_destination,
         "flight_date": data.get("flight_date"),
 
         "hotel_id": data.get("hotel_id"),

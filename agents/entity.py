@@ -27,3 +27,7 @@ class GraphState(TypedDict):
     flight_results: List[dict]
 
     response_text: str
+
+    last_city: Optional[str]
+    last_origin: Optional[str]
+    last_destination: Optional[str]

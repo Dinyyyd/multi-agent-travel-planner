@@ -4,10 +4,9 @@ from entity import ChatRequest, ChatResponse
 from agents.mcp_client import call_mcp_tool
 from agents.graph import graph
 
-conversation_history_messages = []
+sessions = {}
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -34,8 +33,18 @@ async def list_flights():
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
+    session_id = getattr(request, "session_id", None) or "default"
 
-    recent_pairs = conversation_history_messages[-3:]
+    if session_id not in sessions:
+        sessions[session_id] = {
+            "history": [],       # list of (user_msg, assistant_msg) tuples
+            "last_city": None,
+            "last_origin": None,
+            "last_destination": None,
+        }
+    session = sessions[session_id]
+
+    recent_pairs = session["history"][-3:]
     flattened_messages = []
     for user_msg, assistant_msg in recent_pairs:
         flattened_messages.append(user_msg)
@@ -62,13 +71,24 @@ async def chat(request: ChatRequest):
         "hotel_results": [],
         "flight_results": [],
         "response_text": "",
+        # Carry forward last known search context for fallback in the router
+        "last_city": session["last_city"],
+        "last_origin": session["last_origin"],
+        "last_destination": session["last_destination"],
     }
 
     result = graph.invoke(initial_state)
-
     response_text = result.get("response_text", "Something went wrong. Please try again.")
 
-    conversation_history_messages.append((request.message, response_text))
+    session["history"].append((request.message, response_text))
+
+    # Remember this turn's city/origin/destination for the next message, if present
+    if result.get("city"):
+        session["last_city"] = result["city"]
+    if result.get("origin"):
+        session["last_origin"] = result["origin"]
+    if result.get("destination"):
+        session["last_destination"] = result["destination"]
 
     return ChatResponse(
         response=response_text,
@@ -79,5 +99,4 @@ async def chat(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
