@@ -6,76 +6,153 @@ import gradio as gr
 
 API_URL = os.environ.get(
     "TRAVEL_PLANNER_API_URL",
-    "http://127.0.0.1:8000/chat"
+    "https://tripweaver-backend.onrender.com/chat"
 )
 
 CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; }
-
-html, body, .gradio-container, gradio-app, .app {
-    background: #F0EDF8 !important;
+html, body, gradio-app, .gradio-container, .dark, .app, main {
+    background: #E9E3F3 !important;
     font-family: 'DM Sans', sans-serif !important;
     color: #2D2535 !important;
 }
 
 .gradio-container {
-    max-width: 860px !important;
+    max-width: 900px !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding: 20px 16px !important;
+    padding: 24px 16px !important;
+}
+
+/* Strip Gradio's default block chrome from HTML containers (kills the white bar) */
+.html-container, .gr-html, div[data-testid="html"], .block.html {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+}
+.gradio-container .block:has(.trip-hero) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
 .trip-hero {
     text-align: center;
     padding: 36px 24px 28px;
-    background: rgba(255, 255, 255, 0.94);
+    background: #F6F2FB !important;
     border-radius: 16px;
     margin-bottom: 18px;
-    border: 1px solid rgba(123, 94, 167, 0.12);
-    box-shadow: 0 4px 28px rgba(123, 94, 167, 0.12);
+    border: 1px solid rgba(123, 94, 167, 0.15);
+    box-shadow: 0 4px 28px rgba(123, 94, 167, 0.15);
 }
-
 .trip-hero .wordmark {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #7B5EA7;
-    margin-bottom: 10px;
+    font-size: 14px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #7B5EA7 !important; margin-bottom: 10px;
 }
-
 .trip-hero h1 {
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-style: italic;
     font-size: clamp(24px, 4.5vw, 34px);
-    font-weight: 400;
-    color: #2D2535;
-    margin: 0 0 8px 0;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+    font-weight: 400; color: #2D2535 !important;
+    margin: 0 0 8px 0; line-height: 1.2;
+}
+.trip-hero p { font-size: 13px; color: #8A7FA0 !important; margin: 0; }
+
+.chatbot, [data-testid="chatbot"],
+.chatbot > *, [data-testid="chatbot"] > *,
+.bubble-wrap, .message-wrap, .panel, .placeholder-content, .placeholder {
+    background: #E3DDEE !important;
+    color: #2D2535 !important;
+}
+.block, .form {
+    background: #E3DDEE !important;
+    border-color: rgba(123, 94, 167, 0.3) !important;
+    border-radius: 14px !important;
+}
+.chatbot, [data-testid="chatbot"] {
+    border: 1px solid rgba(123, 94, 167, 0.3) !important;
+    border-radius: 14px !important;
+}
+.chatbot .label, [data-testid="chatbot"] .label,
+span[data-testid="block-info"] {
+    background: #E9E3F3 !important;
+    color: #7B5EA7 !important;
 }
 
-.trip-hero p {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: #8A7FA0;
-    margin: 0;
-    letter-spacing: 0.01em;
+textarea, input[type="text"] {
+    background: #E6E0F0 !important;
+    color: #2D2535 !important;
+    border: 1px solid rgba(123, 94, 167, 0.35) !important;
+    border-radius: 22px !important;
 }
+textarea::placeholder, input::placeholder {
+    color: #9C8FB5 !important;
+}
+
+button.primary, button[variant="primary"] {
+    background: linear-gradient(135deg, #8B6FB8, #B98AC9) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 22px !important;
+    font-weight: 600 !important;
+}
+button.primary:hover {
+    background: linear-gradient(135deg, #7B5EA7, #A879BD) !important;
+}
+button.secondary, button[variant="secondary"] {
+    background: #D8CBEA !important;
+    color: #54427A !important;
+    border: 1px solid rgba(123, 94, 167, 0.35) !important;
+    border-radius: 20px !important;
+    font-weight: 500 !important;
+}
+button.secondary:hover, button[variant="secondary"]:hover {
+    background: #C9B8E0 !important;
+}
+
+.message.user, .user .message, [data-testid="user"] {
+    background: linear-gradient(135deg, #8B6FB8, #B98AC9) !important;
+    color: #FFFFFF !important;
+}
+.message.bot, .bot .message, [data-testid="bot"] {
+    background: #DBD2EA !important;
+    color: #2D2535 !important;
+}
+
+.tw-ph { text-align: center; color: #8A7FA0; padding: 40px 20px; }
+.tw-ph-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 20px;
+    margin-bottom: 8px; color: #6B5B8E;
+}
+.tw-ph-sub { font-size: 13px; font-weight: 300; }
 
 footer { display: none !important; }
 
 @media (max-width: 640px) {
     .gradio-container { padding: 12px 10px !important; }
-    .trip-hero { padding: 24px 16px 20px; margin-bottom: 14px; }
-    .trip-hero .wordmark { font-size: 12px; }
+    .trip-hero { padding: 24px 16px 20px; }
     .trip-hero h1 { font-size: 22px; }
-    .trip-hero p { font-size: 12px; }
 }
+"""
+
+HEAD = f"""
+<script>
+(function () {{
+    const url = new URL(window.location);
+    if (url.searchParams.get('__theme') !== 'light') {{
+        url.searchParams.set('__theme', 'light');
+        window.location.replace(url.href);
+    }}
+}})();
+</script>
+<style>{CSS}</style>
 """
 
 
@@ -180,8 +257,8 @@ def respond(message, history):
         time.sleep(0.008)
 
 
-def main():
-    with gr.Blocks(title="TripWeaver", css=CSS) as demo:
+def build_ui():
+    with gr.Blocks(title="TripWeaver", head=HEAD) as demo:
 
         gr.HTML("""
         <div class="trip-hero">
@@ -192,18 +269,12 @@ def main():
         """)
 
         chatbot = gr.Chatbot(
-            height=440,
+            height=500,
             placeholder=(
-                "<div style='text-align:center; color:#8A7FA0; padding:40px 20px;'>"
-                "<div style='font-family:Cormorant Garamond,Georgia,serif; "
-                "font-style:italic; font-size:20px; margin-bottom:8px;'>"
-                "Where would you like to go?"
-                "</div>"
-                "<div style='font-family:DM Sans,sans-serif; font-size:13px; "
-                "font-weight:300;'>"
-                "Ask about hotels in a city, flights between airports, "
-                "or help planning a trip."
-                "</div>"
+                "<div class='tw-ph'>"
+                "<div class='tw-ph-title'>Where would you like to go?</div>"
+                "<div class='tw-ph-sub'>Ask about hotels in a city, "
+                "flights between airports, or help planning a trip.</div>"
                 "</div>"
             ),
         )
@@ -223,14 +294,16 @@ def main():
             btn3 = gr.Button("Help me plan a trip", size="sm", variant="secondary")
 
         btn1.click(lambda: "Find me somewhere to stay", outputs=message)
-        btn2.click(lambda: "Search for a flight", outputs=message)
+        btn2.click(lambda: "I need to search for a flight", outputs=message)
         btn3.click(lambda: "Help me plan a trip", outputs=message)
 
         submit.click(respond, inputs=[message, chatbot], outputs=chatbot)
         message.submit(respond, inputs=[message, chatbot], outputs=chatbot)
 
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    return demo
 
+
+demo = build_ui()
 
 if __name__ == "__main__":
-    main()
+    demo.launch()
